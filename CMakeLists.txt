@@ -1,5 +1,16 @@
 cmake_minimum_required(VERSION 3.15.0)
 
+# Add an option to enable or disable multithreading
+option(ENABLE_MULTITHREADING "Enable multithreading support" ON)
+
+# Conditionally add a definition based on the option
+if(ENABLE_MULTITHREADING)
+    add_definitions(-DENABLE_MULTITHREADING)
+endif()
+
+# Print the status of the multithreading flag
+message(STATUS "Multithreading support: ${ENABLE_MULTITHREADING}")
+
 # For MSVC RUNTIME LIBRARY, need CMP0091=NEW and cmake 3.15+
 cmake_policy(SET CMP0091 NEW)
 
