@@ -58,6 +58,19 @@ namespace QuantLib {
     Date::Date()
     : serialNumber_(Date::serial_type(0)) {}
 
+    int Date::weekendsBetween(const Date& start, const Date& end) {
+        int weekends = 0;
+        Date current = start;
+        while(current <=end) {
+            Weekday w = current.weekday();
+            if(w == Saturday || w == Sunday) {
+                weekends++;
+            }
+            current++;
+        }
+        return weekends;
+    }
+
     Date::Date(Date::serial_type serialNumber)
     : serialNumber_(serialNumber) {
         checkSerialNumber(serialNumber);

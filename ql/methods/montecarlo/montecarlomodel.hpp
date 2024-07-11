@@ -93,65 +93,65 @@ namespace QuantLib {
         ext::shared_ptr<path_generator_type> cvPathGenerator_;
     };
 
-#ifdef ENABLE_MULTITHREADING
-
-    // inline definitions
-    template <template <class> class MC, class RNG, class S>
-    inline void MonteCarloModel<MC,RNG,S>::addSamples(Size samples) {
-        const int numThreads = std::thread::hardware_concurrency();
-        std::vector<std::thread> threads;
-        std::mutex mtx;
-
-        auto worker = [&](Size start, Size end)
-        {
-            for(Size j = start; j <= end; j++) {
-
-                const sample_type& path = pathGenerator_->next();
-                result_type price = (*pathPricer_)(path.value);
-
-                if (isControlVariate_) {
-                    if (!cvPathGenerator_) {
-                        price += cvOptionValue_-(*cvPathPricer_)(path.value);
-                    }
-                    else {
-                        const sample_type& cvPath = cvPathGenerator_->next();
-                        price += cvOptionValue_-(*cvPathPricer_)(cvPath.value);
-                    }
-                }
-
-                if (isAntitheticVariate_) {
-                    const sample_type& atPath = pathGenerator_->antithetic();
-                    result_type price2 = (*pathPricer_)(atPath.value);
-                    if (isControlVariate_) {
-                        if (!cvPathGenerator_)
-                            price2 += cvOptionValue_-(*cvPathPricer_)(atPath.value);
-                        else {
-                            const sample_type& cvPath = cvPathGenerator_->antithetic();
-                            price2 += cvOptionValue_-(*cvPathPricer_)(cvPath.value);
-                        }
-                    }
-                    std::lock_guard<std::mutex> lock(mtx);
-                    sampleAccumulator_.add((price+price2)/2.0, path.weight);
-                } else {
-                    std::lock_guard<std::mutex> lock(mtx);
-                    sampleAccumulator_.add(price, path.weight);
-                }
-            }
-        };
-
-        Size chunkSize = samples/numThreads;
-        for(int i=0; i<numThreads; ++i) {
-            Size start = i*chunkSize;
-            Size end = (i == numThreads-1)? samples : (i+1)*chunkSize;
-            threads.emplace_back(worker,start, end);
-        }
-
-        for(auto t :threads) {
-            if(t.joinable()) t.join();
-        }
-    }
-
-#else
+// #ifdef ENABLE_MULTITHREADING
+//
+//     // inline definitions
+//     template <template <class> class MC, class RNG, class S>
+//     inline void MonteCarloModel<MC,RNG,S>::addSamples(Size samples) {
+//         const int numThreads = std::thread::hardware_concurrency();
+//         std::vector<std::thread> threads;
+//         std::mutex mtx;
+//
+//         auto worker = [&](Size start, Size end)
+//         {
+//             for(Size j = start; j <= end; j++) {
+//
+//                 const sample_type& path = pathGenerator_->next();
+//                 result_type price = (*pathPricer_)(path.value);
+//
+//                 if (isControlVariate_) {
+//                     if (!cvPathGenerator_) {
+//                         price += cvOptionValue_-(*cvPathPricer_)(path.value);
+//                     }
+//                     else {
+//                         const sample_type& cvPath = cvPathGenerator_->next();
+//                         price += cvOptionValue_-(*cvPathPricer_)(cvPath.value);
+//                     }
+//                 }
+//
+//                 if (isAntitheticVariate_) {
+//                     const sample_type& atPath = pathGenerator_->antithetic();
+//                     result_type price2 = (*pathPricer_)(atPath.value);
+//                     if (isControlVariate_) {
+//                         if (!cvPathGenerator_)
+//                             price2 += cvOptionValue_-(*cvPathPricer_)(atPath.value);
+//                         else {
+//                             const sample_type& cvPath = cvPathGenerator_->antithetic();
+//                             price2 += cvOptionValue_-(*cvPathPricer_)(cvPath.value);
+//                         }
+//                     }
+//                     std::lock_guard<std::mutex> lock(mtx);
+//                     sampleAccumulator_.add((price+price2)/2.0, path.weight);
+//                 } else {
+//                     std::lock_guard<std::mutex> lock(mtx);
+//                     sampleAccumulator_.add(price, path.weight);
+//                 }
+//             }
+//         };
+//
+//         Size chunkSize = samples/numThreads;
+//         for(int i=0; i<numThreads; ++i) {
+//             Size start = i*chunkSize;
+//             Size end = (i == numThreads-1)? samples : (i+1)*chunkSize;
+//             threads.emplace_back(worker,start, end);
+//         }
+//
+//         for(auto t :threads) {
+//             if(t.joinable()) t.join();
+//         }
+//     }
+//
+// #else
 
     // inline definitions
     template <template <class> class MC, class RNG, class S>
@@ -190,7 +190,7 @@ namespace QuantLib {
         }
     }
 
-#endif
+//#endif
 
     template <template <class> class MC, class RNG, class S>
     inline const typename MonteCarloModel<MC,RNG,S>::stats_type&

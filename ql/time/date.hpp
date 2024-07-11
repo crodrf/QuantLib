@@ -124,6 +124,7 @@ namespace QuantLib {
 
     class Date {
       public:
+        static int weekendsBetween(const Date& start, const Date& end);
         //! serial number type
         typedef std::int_fast32_t serial_type;
         //! \name constructors
